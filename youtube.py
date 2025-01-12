@@ -18,7 +18,6 @@ def download(url: str, filename: str):
 
         yt = YouTube(url,) #proxies=proxy)
         ys = yt.streams.get_highest_resolution()
-        print(yt.streams)
 
         # ys.download(output_path=f'cache/youtube/', timeout=120, filename=f'{filename}_raw.mp4')
         # # сжатие видео
