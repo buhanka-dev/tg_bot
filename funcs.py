@@ -8,6 +8,7 @@ from aiogram.types import *
 from params import *
 from tiktok import *
 import logging
+from imgur_uploader import *
 import asyncio
 
 # декораторы
@@ -85,13 +86,14 @@ async def process_tiktok_download(message: Message, state: FSMContext):
         filename, message_text = str(message.from_user.id) + str(message.message_id), message.text
 
         # скачивание файла с тектока, подробнее в tiktok.py
-        download_tiktok(message_text, filename)
+        urls = download_tiktok(message_text, filename)
 
-        file = FSInputFile(f'cache/tiktok/{filename}.mp4')
-
-        await message.answer_video(file, caption='на, держи!', reply_markup=keyboard_menu)
-
-
+        # сслыка видео?
+        if os.path.exists(f'cache/tiktok/{filename}.mp4'):
+            file = FSInputFile(f'cache/tiktok/{filename}.mp4')
+            await message.answer_video(file, caption='на, держи!', reply_markup=keyboard_menu)
+        else: # ссылка фото'
+            await message.answer('мне лень')
     except Exception as e:
         logging.exception(e)
         print('ERROR', e)

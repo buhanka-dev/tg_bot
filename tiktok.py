@@ -6,7 +6,7 @@ from urllib.request import urlopen
 from bs4 import BeautifulSoup
 
 def download_tiktok(link, filename):
-    try:
+    # try:
         #куки файлы
         cookies = {
             'cf_clearance': 'ecB.1i0xqpG0WZvIWeewAB8LugZwyh_Bf.ImrjIPicY-1733458177-1.2.1.1-ZALAc2hsAJzlsp7wBQvUpf_KFWmQeK6pI6klZyZItXrlOA8VAdpZ8sSb2gb1vNwblzIGPrJeICjS0ELUf36mpQojtZVFSxptLzC7bqN.jlNVcNEYEI5Z_M2F4ZuUh6wu5soNUv0mbNhZBljxKXD.SvObEtQXkmXP9KY8BoLrjNsAe1.AnVXc7mjtflVQvrTPQHjWQ0Y.VBgKbIjYMjfwYV8raoaVMqMQwUnl9npEcyyqQ1kAihsE5hXG2aJLdZEklK_RR4Whw6xtncQHuPjLtVVJLVoS6Q.lKyzS9GndClpUA5r3v781It15mpboTJvEcswQz6G3vHSIqK2.Tiwd6jdgMuFugUqZQ_2EO18qRw1jaUU8NFCDv9uLGY2Polix8UbeCwMkQISqza0b3KH9fl2Q8fiS4tEea0A0.4Dw8yn1Ey8hkKub0tkPGzZvp3.M',
@@ -54,15 +54,27 @@ def download_tiktok(link, filename):
         response = requests.post('https://ssstik.io/abc', params=params, cookies=cookies, headers=headers, data=data)
         soup = BeautifulSoup(response.text, 'html.parser')
 
-        file = urlopen(soup.a['href'])
-        with open(f'cache/tiktok/{filename}.mp4', 'wb') as output:
-            data = file.read()
-            output.write(data)
+        print(soup.find_all('a'))
 
-    except AttributeError as e:
-        # logging.error('таймаут')
-        # raise e
-        ...
+        if soup.find_all('a')[0].text == 'Without watermark':
+            print('video')
+            file = urlopen(soup.a['href'])
+            with open(f'cache/tiktok/{filename}.mp4', 'wb') as output:
+                data = file.read()
+                output.write(data)
+            return soup.a['href']
+        else:
+            print('photo')
+            urls = []
+            for u in soup.find_all('a'):
+                if u.text == 'Download this slide':
+                    urls.append(u['href'])
+            print(urls)
+            return urls
+
+    # except AttributeError as e:
+    #     # logging.error('таймаут')
+    #     ...
 
 # тесты
 if __name__ == '__main__':
