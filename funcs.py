@@ -93,7 +93,8 @@ async def process_tiktok_download(message: Message, state: FSMContext):
             file = FSInputFile(f'cache/tiktok/{filename}.mp4')
             await message.answer_video(file, caption='на, держи!', reply_markup=keyboard_menu)
         else: # ссылка фото'
-            await message.answer('мне лень')
+            file = FSInputFile(f'cache/tiktok/{filename}.txt')
+            await message.answer_document(file, caption='на, держи!', reply_markup=keyboard_menu)
     except Exception as e:
         logging.exception(e)
         print('ERROR', e)

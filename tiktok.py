@@ -69,7 +69,10 @@ def download_tiktok(link, filename):
             for u in soup.find_all('a'):
                 if u.text == 'Download this slide':
                     urls.append(u['href'])
-            print(urls)
+
+            with open(f'cache/tiktok/{filename}.txt', 'w') as output:
+                output.write('\n'.join(urls))
+                print(output.read)
             return urls
 
     # except AttributeError as e:
