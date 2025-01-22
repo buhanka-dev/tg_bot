@@ -14,12 +14,6 @@ class Form(StatesGroup):
     yt = State()
     tt = State()
 
-logging.basicConfig(format='%(asctime)s – %(filename)s:%(lineno)d – %(levelname)s: %(message)s',
-                    datefmt='%d/%m/%Y %H:%M:%S',
-                    level=logging.DEBUG)
-
-logging.debug('Это не та запись в журнале, которую вы ищете')
-
 # базовые переменные, чтобы все работало
 form_router = Router()
 TOKEN = '7858275211:AAGpfmKD2n66Gzas3ljiYPHUnbRt6siPjpM'

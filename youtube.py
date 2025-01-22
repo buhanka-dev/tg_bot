@@ -2,26 +2,14 @@
 from pytubefix import *
 from rutube import Rutube
 # from proxy import find_first
-from video import convert_vid
 from params import *
 
-def download(url: str, filename: str):
+def download(url, filename):
     if url.find('youtube') != -1 or url.find('youtu.be') != -1: # ссылка на ютуб?
-        # СТАРОЕ !!!!
-        # прокси полученные в программе proxy.py
-        # p = find_first(url)
-        # proxy = {
-        #   'http': f'http://{p}',
-        # }
+        logging.info(url)
 
-        # P.S теперь проски ненужны потому что я скачал zapret
-
-        yt = YouTube(url,) #proxies=proxy)
+        yt = YouTube(url, use_po_token=True)
         ys = yt.streams.get_highest_resolution()
-
-        # ys.download(output_path=f'cache/youtube/', timeout=120, filename=f'{filename}_raw.mp4')
-        # # сжатие видео
-        # convert_vid(filename, compress=True)
 
         # запись файла в папку
         ys.download(output_path=f'cache/youtube/', timeout=120, filename=f'{filename}.mp4')

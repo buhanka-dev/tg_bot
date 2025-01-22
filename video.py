@@ -2,6 +2,7 @@
 import logging
 
 from moviepy import *
+from funcs import *
 
 def c(input_file, output_file):
     try:

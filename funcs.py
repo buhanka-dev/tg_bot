@@ -1,4 +1,6 @@
 import os
+import time
+
 from youtube import *
 from video import *
 from image import *
@@ -10,6 +12,8 @@ from tiktok import *
 import logging
 from imgur_uploader import *
 import asyncio
+import atexit
+import shutil
 
 # декораторы
 @form_router.message(Command('start'))
@@ -80,21 +84,23 @@ async def process_tiktok(message: Message, state: FSMContext):
 async def process_tiktok_download(message: Message, state: FSMContext):
     # тут почти все как в process_yt_download
     try:
-        await message.answer('сейчас обработаю подожди...\n'
-                             'с фото если что не работает')
+        await message.answer('сейчас обработаю подожди...')
         # переменные названия файла, из user_id и message_id, и ссылки на видео
         filename, message_text = str(message.from_user.id) + str(message.message_id), message.text
 
         # скачивание файла с тектока, подробнее в tiktok.py
-        urls = download_tiktok(message_text, filename)
+        files = download_tiktok(message_text, filename)
 
         # сслыка видео?
         if os.path.exists(f'cache/tiktok/{filename}.mp4'):
             file = FSInputFile(f'cache/tiktok/{filename}.mp4')
             await message.answer_video(file, caption='на, держи!', reply_markup=keyboard_menu)
         else: # ссылка фото'
-            file = FSInputFile(f'cache/tiktok/{filename}.txt')
-            await message.answer_document(file, caption='на, держи!', reply_markup=keyboard_menu)
+            for i in range(0, len(files), 10):
+                images = [types.input_media_photo.InputMediaPhoto(media=FSInputFile(i)) for i in files[i:i + 10]]
+                await message.answer_media_group(images)
+                await message.answer(f'[{min(i + 10, len(files))}/{len(files)}]')
+            await message.answer('это все')
     except Exception as e:
         logging.exception(e)
         print('ERROR', e)
@@ -188,10 +194,9 @@ async def convert_image(message: types.Message, state: FSMContext):
 
         await message.answer_document(file, caption='на, держи!', reply_markup=keyboard_menu)
     except Exception as e:
-        logging.exception(e)
-        await message.answer('не вовремя')
+        logging.error(e)
+        await message.answer('иди поплачь')
     finally:
-        os.remove(file_path)
         os.remove('cache/images/' + filename + '.' + file_format)
         await state.clear()
 
@@ -211,8 +216,20 @@ def check_cache_on_start():
         for directory in dirs:
             os.mkdir(f'cache/{directory}')
 
+
+def exit_handler():
+    shutil.rmtree('cache')
+
 # запуск бота
 async def main():
+    logging.basicConfig(
+        # filename="logs/" + '_'.join(str(time.ctime(time.time())).split()).replace(":", "") + ".log",
+        format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
+        level=logging.DEBUG
+    )
+
+    logger = logging.getLogger(__name__)
+    atexit.register(exit_handler)
     check_cache_on_start()
     dp.include_router(form_router)
     await dp.start_polling(bot)
