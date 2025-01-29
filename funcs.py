@@ -10,7 +10,6 @@ from aiogram.types import *
 from params import *
 from tiktok import *
 import logging
-from imgur_uploader import *
 import asyncio
 import atexit
 import shutil
@@ -58,12 +57,23 @@ async def process_yt_download(message: Message, state: FSMContext):
         filename, message_text = str(message.from_user.id) + str(message.message_id), message.text
 
         # скачивание файла с ютуб, подробнее в youtube.py
-        download(message_text, filename)
+        files = download(message_text)
+        if len(files) == 1: # ссылка на видео
+            files = files[0]
+            print('wv')
+            print(files)
+            file = FSInputFile(files)
+            await message.answer_video(file, caption='на, держи!', reply_markup=keyboard_menu)
+            os.remove(files)
 
-        file = FSInputFile(f'cache/youtube/{filename}.mp4')
-
-        await message.answer_video(file, caption='на, держи!', reply_markup=keyboard_menu)
-        os.remove(f'cache/youtube/{filename}.mp4')
+        else: # ссылка плэйлист'
+            print('wp')
+            print(files)
+            for i in range(0, len(files), 5):
+                vids = [types.input_media_video.InputMediaVideo(media=FSInputFile(i)) for i in files[i:i + 5]]
+                await message.answer_media_group(vids)
+                await message.answer(f'[{min(i + 5, len(files))}/{len(files)}]')
+            await message.answer('это все')
     except Exception as e:
         logging.exception(e)
         print('ERROR', e)
