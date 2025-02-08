@@ -54,26 +54,26 @@ async def process_yt_download(message: Message, state: FSMContext):
         await message.answer('сейчас обработаю подожди, терпение...\n'
                              'это не должно занимать много времени')
         # переменные названия файла, из user_id и message_id, и ссылки на видео
-        filename, message_text = str(message.from_user.id) + str(message.message_id), message.text
+        message_text = message.text
 
         # скачивание файла с ютуб, подробнее в youtube.py
-        files = download(message_text)
+        files = download('https://www.youtube.com/watch?v=YtUvMXvln4w')
+        """message_text"""
+        print(files)
         if len(files) == 1: # ссылка на видео
-            files = files[0]
+            out = files[0]
             print('wv')
             print(files)
-            file = FSInputFile(files)
-            await message.answer_video(file, caption='на, держи!', reply_markup=keyboard_menu)
-            os.remove(files)
+            await message.answer_video(FSInputFile(out[0]), caption=out[1], reply_markup=keyboard_menu)
+            await message.answer('на, держи!')
 
-        else: # ссылка плэйлист'
+        else: # ссылка плейлист
             print('wp')
             print(files)
-            for i in range(0, len(files), 5):
-                vids = [types.input_media_video.InputMediaVideo(media=FSInputFile(i)) for i in files[i:i + 5]]
-                await message.answer_media_group(vids)
-                await message.answer(f'[{min(i + 5, len(files))}/{len(files)}]')
-            await message.answer('это все')
+            for out in files:
+                print(out[0], out[1])
+                await message.answer_video(FSInputFile(out[0]), caption=out[1])
+            await message.answer('это все', reply_markup=keyboard_menu)
     except Exception as e:
         logging.exception(e)
         print('ERROR', e)
